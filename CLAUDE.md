@@ -15,7 +15,7 @@ Maven Central sometimes answers with HTTP 429 from the cloud container. If depen
 ```bash
 ./gradlew assembleDebug                 # debug APK -> app/build/outputs/apk/debug/
 ./gradlew testDebugUnitTest             # JVM unit tests
-./gradlew testDebugUnitTest --tests 'com.tttt.app.ClickMessageTest.manyClicks'
+./gradlew testDebugUnitTest --tests 'com.tttt.app.ui.counter.CounterViewModelTest.clickIncrementsCounter'
 ./gradlew lintDebug                     # report in app/build/reports/
 ./gradlew assembleRelease               # R8-minified; signed only if keystore env vars are set
 ```
@@ -28,12 +28,18 @@ Maven Central sometimes answers with HTTP 429 from the cloud container. If depen
   - `VERSION_NAME` (a leading `v` is stripped, so a tag name can be passed directly) and `VERSION_CODE`. Without them the defaults are `0.1.0-dev` and `1`.
   - `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD`. Without these, the release build is unsigned.
 
-## Code style
+## Code style and architecture
 
-The owner wants code that is simple and easy for a person to read. Write Kotlin, not Java, and prefer Kotlin for build and helper code too, such as `*.gradle.kts`.
-- Don't add layers, abstractions or files until they are actually needed. One small file beats several tiny ones.
-- Prefer plain functions and obvious names. A short comment explaining *why* is welcome.
-- Keep logic that can be tested in plain top-level functions with no Android types, like `clickMessage` in `MainActivity.kt`, so it can be unit-tested on the JVM.
+The owner wants code that a person can read easily and that follows standard Android best practices. Write Kotlin, not Java, including build scripts (`*.gradle.kts`).
+
+The code follows the official Android app architecture guidance: one package per feature under `ui/`.
+- `ui/<feature>/<Feature>ViewModel.kt`: an immutable `<Feature>UiState` data class, exposed as a `StateFlow` by a `ViewModel` with `on<Event>()` methods. It has no Android UI types, so it can be unit-tested on the JVM. Tests go in `app/src/test/.../ui/<feature>/`.
+- `ui/<feature>/<Feature>Screen.kt` has two composables:
+  - `<Feature>Route` gets the ViewModel and collects its state with `collectAsStateWithLifecycle`.
+  - `<Feature>Screen` is stateless: it takes `uiState` and event lambdas, and has a `@Preview`.
+- `ui/theme/Theme.kt` holds `TtttTheme`, which uses Material 3 with dynamic color on Android 12+.
+- User-visible text goes in `res/values/strings.xml`. Counts use `<plurals>`, and Kotlin code never hardcodes UI text.
+- Keep it as simple as the feature allows. Don't add DI frameworks, repositories or navigation until a feature actually needs them.
 
 ## CI / Release (`.github/workflows/`)
 
