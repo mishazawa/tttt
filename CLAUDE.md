@@ -44,4 +44,4 @@ The code follows the official Android app architecture guidance: one package per
 ## CI / Release (`.github/workflows/`)
 
 - `ci.yml`: runs on every branch push and PR. It builds, tests and lints, then uploads the debug APK and the reports as artifacts.
-- `release.yml`: pushing a tag `vX.Y.Z` creates a GitHub Release with `tttt-vX.Y.Z-debug.apk` attached. It also attaches `tttt-vX.Y.Z.apk` (signed release) when the repository secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD` are set. `VERSION_CODE` is the workflow run number.
+- `release.yml`: pushing a tag `vX.Y.Z`, or running the workflow manually with a `version` input (which creates the tag), creates a GitHub Release with `tttt-vX.Y.Z-debug.apk` attached. It also attaches `tttt-vX.Y.Z.apk` (signed release) when the repository secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD` are set. `VERSION_CODE` is the workflow run number. Cloud sessions can't push tags (the git proxy returns 403), so to release from a session, start this workflow with the GitHub MCP `actions_run_trigger` on `main`.
