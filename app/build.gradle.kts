@@ -3,9 +3,13 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
-// Version comes from CI (tag vX.Y.Z / run number) or falls back to dev defaults.
-val appVersionName = providers.environmentVariable("VERSION_NAME").map { it.removePrefix("v") }.orElse("0.1.0-dev").get()
-val appVersionCode = providers.environmentVariable("VERSION_CODE").orElse("1").get().toInt()
+// CI sets these from the git tag (v1.2.3) and the workflow run number.
+// Local builds use the defaults.
+val appVersionName = (System.getenv("VERSION_NAME") ?: "0.1.0-dev").removePrefix("v")
+val appVersionCode = (System.getenv("VERSION_CODE") ?: "1").toInt()
+
+// The release signing key is passed in by CI. Without it the release APK is unsigned.
+val keystorePath: String? = System.getenv("ANDROID_KEYSTORE_PATH")
 
 android {
     namespace = "com.tttt.app"
@@ -21,15 +25,13 @@ android {
         versionName = appVersionName
     }
 
-    // Release signing is configured only when the keystore env vars are present (CI secrets).
-    val keystorePath = providers.environmentVariable("ANDROID_KEYSTORE_PATH").orNull
     signingConfigs {
         if (keystorePath != null) {
             create("release") {
                 storeFile = file(keystorePath)
-                storePassword = providers.environmentVariable("ANDROID_KEYSTORE_PASSWORD").get()
-                keyAlias = providers.environmentVariable("ANDROID_KEY_ALIAS").get()
-                keyPassword = providers.environmentVariable("ANDROID_KEY_PASSWORD").get()
+                storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("ANDROID_KEY_ALIAS")
+                keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
             }
         }
     }
@@ -58,8 +60,6 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit)
 }

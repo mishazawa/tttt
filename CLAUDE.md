@@ -15,7 +15,7 @@ Maven Central sometimes answers with HTTP 429 from the cloud container. If depen
 ```bash
 ./gradlew assembleDebug                 # debug APK -> app/build/outputs/apk/debug/
 ./gradlew testDebugUnitTest             # JVM unit tests
-./gradlew testDebugUnitTest --tests 'com.tttt.app.CounterTest.clickIncrementsAndPluralizes'
+./gradlew testDebugUnitTest --tests 'com.tttt.app.ClickMessageTest.manyClicks'
 ./gradlew lintDebug                     # report in app/build/reports/
 ./gradlew assembleRelease               # R8-minified; signed only if keystore env vars are set
 ```
@@ -27,7 +27,13 @@ Maven Central sometimes answers with HTTP 429 from the cloud container. If depen
 - Versioning and signing come from environment variables in `app/build.gradle.kts`, not from hardcoded values:
   - `VERSION_NAME` (a leading `v` is stripped, so a tag name can be passed directly) and `VERSION_CODE`. Without them the defaults are `0.1.0-dev` and `1`.
   - `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD`. Without these, the release build is unsigned.
-- Keep UI state logic in plain Kotlin classes such as `Counter.kt`, with no Android types, so it can be unit-tested on the JVM. Composables in `MainActivity.kt` only render that state.
+
+## Code style
+
+The owner wants code that is simple and easy for a person to read. Write Kotlin, not Java, and prefer Kotlin for build and helper code too, such as `*.gradle.kts`.
+- Don't add layers, abstractions or files until they are actually needed. One small file beats several tiny ones.
+- Prefer plain functions and obvious names. A short comment explaining *why* is welcome.
+- Keep logic that can be tested in plain top-level functions with no Android types, like `clickMessage` in `MainActivity.kt`, so it can be unit-tested on the JVM.
 
 ## CI / Release (`.github/workflows/`)
 
