@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">tttt</string>
+    <string name="press_me">Press me</string>
+    <string name="tap_the_button">Tap the button</string>
+    <plurals name="tapped_times">
+        <item quantity="one">Tapped %d time</item>
+        <item quantity="other">Tapped %d times</item>
+    </plurals>
+</resources>
