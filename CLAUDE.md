@@ -41,7 +41,14 @@ The code follows the official Android app architecture guidance: one package per
 - User-visible text goes in `res/values/strings.xml`. Counts use `<plurals>`, and Kotlin code never hardcodes UI text.
 - Keep it as simple as the feature allows. Don't add DI frameworks, repositories or navigation until a feature actually needs them.
 
+## Workflow
+
+1. Work on a feature branch. Before every push, verify locally: `./gradlew assembleDebug testDebugUnitTest lintDebug`. All of it must pass, and lint must report no issues.
+2. Push the feature branch and open a PR into `main`. CI runs on the PR.
+3. When CI is green, merge into `main`.
+4. To release, run `release.yml` on `main` with a `version` input.
+
 ## CI / Release (`.github/workflows/`)
 
-- `ci.yml`: runs on every branch push and PR. It builds, tests and lints, then uploads the debug APK and the reports as artifacts.
+- `ci.yml`: runs on PRs into `main`, on pushes to `main`, and on manual runs. It builds, tests and lints, then uploads the debug APK and the reports as artifacts.
 - `release.yml`: pushing a tag `vX.Y.Z`, or running the workflow manually with a `version` input (which creates the tag), creates a GitHub Release with `tttt-vX.Y.Z-debug.apk` attached. It also attaches `tttt-vX.Y.Z.apk` (signed release) when the repository secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD` are set. `VERSION_CODE` is the workflow run number. Cloud sessions can't push tags (the git proxy returns 403), so to release from a session, start this workflow with the GitHub MCP `actions_run_trigger` on `main`.
